@@ -11,12 +11,26 @@ import ContactDetail from "./pages/ContactDetail";
 import "./App.css";
 /* eslint-enable import/first */
 
+const STORAGE_KEY = "gk_contacts";
+
 const App = () => {
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Mounting: đọc dữ liệu đã lưu, nếu không có thì gọi API
   useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        setContacts(JSON.parse(saved));
+        setLoading(false);
+        return;
+      } catch (e) {
+        // dữ liệu lưu bị hỏng -> gọi API như bình thường
+      }
+    }
+
     const controller = new AbortController();
 
     const fetchContacts = async () => {
@@ -37,6 +51,14 @@ const App = () => {
     fetchContacts();
     return () => controller.abort();
   }, []);
+
+  // Updating: lưu dữ liệu sau khi đã tải xong
+  useEffect(() => {
+    if (!loading && !error) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(contacts));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contacts, loading]);
 
   const addContact = (contact) => {
     setContacts((prev) => {
@@ -61,7 +83,7 @@ const App = () => {
   return (
     <Routes>
       <Route path="/" element={<Layout loading={loading} error={error} />}>
-        <Route index element={<Home />} />
+        <Route index element={<Home contacts={contacts} />} />
         <Route
           path="contacts"
           element={
