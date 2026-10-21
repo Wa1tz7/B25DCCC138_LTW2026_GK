@@ -18,7 +18,6 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Mounting: đọc dữ liệu đã lưu, nếu không có thì gọi API
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -27,7 +26,6 @@ const App = () => {
         setLoading(false);
         return;
       } catch (e) {
-        // dữ liệu lưu bị hỏng -> gọi API như bình thường
       }
     }
 
@@ -52,12 +50,10 @@ const App = () => {
     return () => controller.abort();
   }, []);
 
-  // Updating: lưu dữ liệu sau khi đã tải xong
   useEffect(() => {
     if (!loading && !error) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(contacts));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contacts, loading]);
 
   const addContact = (contact) => {
